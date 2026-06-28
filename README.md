@@ -28,3 +28,10 @@ side has to send the counter over the network -- which is why this
 works completely offline.
 ========================================================
 """ 
+
+
+The RFC's rule is:
+
+    # Take the last byte of the hash, and look at only its last
+    # 4 bits (a "nibble"). That gives us a number from 0-15, which
+    # we use as a starting offset into the 20-byte hash.
