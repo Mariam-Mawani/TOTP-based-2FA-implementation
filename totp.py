@@ -60,3 +60,26 @@ def hotp(secret_base32: str, counter: int, digits: int =6) -> str:
 
     # Pad with leading zeros if needed(e.g. 42 -> "000042")
     return str(code).zfill(digits)
+
+
+# TOTP - turning HOTP into a TIME-based code (RFC 6238)
+def totp(secret_base32: str, for_time: int = None, time_step: int = 30, digits: int = 6) -> str:
+    """
+    Generate a TOTP code for the current moment in time.
+
+    This is just HOTP, but instead of a counter that increases by 1
+    each time, we calculate the counter from the current Unix time,
+    divided into fixed-size "time steps" (usually 30 seconds).
+
+    for_time  : Unix timestamp to generate the code for.
+                Defaults to "right now". Letting this be passed in
+                is what lets us test against the RFC's known vectors.
+    time_step : how many seconds each code is valid for (30 is standard)
+    """
+    if for_time is None:
+        for_time = int(time.time())
+
+    # This is the only difference from HOTP: the counter is just
+    # "how many 30-second windows have passed since 1970".
+    counter = int(for_time // time_step)
+    return hotp(secret_base32, counter, digits)
