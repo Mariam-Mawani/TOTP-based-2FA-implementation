@@ -83,3 +83,21 @@ def totp(secret_base32: str, for_time: int = None, time_step: int = 30, digits: 
     # "how many 30-second windows have passed since 1970".
     counter = int(for_time // time_step)
     return hotp(secret_base32, counter, digits)
+
+
+# Verifying a code (with a small tolerance window)
+def verify_totp(secret_base32: str, code_to_check: str, time_step: int = 30, digits: int = 6,
+                window: int = 1) -> bool:
+    """
+    Check whether `code_to_check` is valid right now.
+
+    We check a small "window" of time steps before/after the
+    current one too. This matters in real life because:
+      - there can be a tiny clock drift between your phone and
+        the server
+      - you might type the code just as it's about to expire
+
+    window=1 means "check the previous step, current step, and
+    next step" (i.e. allow +/- 30 seconds of drift).
+    """
+    current_time = int(time.time())
