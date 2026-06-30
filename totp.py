@@ -121,6 +121,11 @@ def run_rfc6238_self_test():
 
     # The RFC's test secret is the ASCII string "12345678901234567890"
     # We need it Base32-encoded since our hotp() function expects that.
+    test_secret_ascii = b"12345678901234567890"
+    test_secret_base32 = base64.b32encode(test_secret_ascii).decode("utf-8")
+
+    # Each tuple is: (unix_time, expected_8_digit_code)
+    # Note: the RFC's test vectors use 8-digit codes, not the usual 6.
     test_vectors = [(59, "94287082"),
                     (1111111109, "07081804"),
                     (1111111111, "14050471"),
@@ -130,4 +135,17 @@ def run_rfc6238_self_test():
     
     all_passed = True
     for test_time, expected_code in test_vectors:
-        actual_code = totp(test_secret_base32,)
+        actual_code = totp(test_secret_base32,for_time=test_time, digits=8)
+        passed = (actual_code == expected_code)
+        all_passed = all_passed and passed
+        status = "PASS" if passed else "FAIL"
+        print(f"time={test_time:<12} expected={expected_code}"
+              f"actual={actual_code} [{status}]")
+        
+        print("-" * 60)
+        if all_passed:
+            print("All test vectors passed! The algorithm is implemented correctly.")
+        else:
+            print("Some test vectors failed -- check the implementation.")
+        print("=" * 60)
+        return all_passed
