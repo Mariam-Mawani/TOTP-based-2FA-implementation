@@ -1,9 +1,9 @@
-"""
-totp.py
+2FA simulator
 ========================================================
 A from-scratch implementation of TOTP (Time-based One-Time
 Password) -- the same algorithm used by Google Authenticator,
 Microsoft Authenticator, Authy, etc.
+
 
 We are NOT using a library like pyotp. We are implementing the
 actual algorithm ourselves, based on two official specifications:
@@ -12,6 +12,7 @@ actual algorithm ourselves, based on two official specifications:
     RFC 6238 - TOTP (Time-based One-Time Password), which is
                just HOTP where the "counter" is derived from
                the current time instead of an incrementing number.
+
 
 HOW IT WORKS (high level):
 1. You and the server share a secret key (this is what gets
@@ -23,15 +24,8 @@ HOW IT WORKS (high level):
 5. If your 6-digit number matches the server's 6-digit number,
    you're authenticated.
 
+
 Because both sides calculate the same counter from time, neither
 side has to send the counter over the network -- which is why this
 works completely offline.
 ========================================================
-""" 
-
-
-The RFC's rule is:
-
-    # Take the last byte of the hash, and look at only its last
-    # 4 bits (a "nibble"). That gives us a number from 0-15, which
-    # we use as a starting offset into the 20-byte hash.
