@@ -101,3 +101,33 @@ def verify_totp(secret_base32: str, code_to_check: str, time_step: int = 30, dig
     next step" (i.e. allow +/- 30 seconds of drift).
     """
     current_time = int(time.time())
+    for error_margin in range(-window, window + 1):
+        time_to_check = current_time + (error_margin * time_step)
+        expected_code = totp(secret_base32, for_time=time_to_check, time_step=time_step, digits=digits)
+        
+        if hmac.compare_digest(expected_code, code_to_check):
+            return True
+        return False
+    
+
+# Self-test against the OFFICIAL RFC 6238 test vectors.
+# RFC 6238 Appendix B gives a known secret and known correct outputs
+# for specific timestamps. Able to verify implementation is correct, 
+# not just plausible.
+def run_rfc6238_self_test():
+    print("=" * 60)
+    print("Running self-test against official RFC 6238 test vouchers")
+    print("=" * 60)
+
+    # The RFC's test secret is the ASCII string "12345678901234567890"
+    # We need it Base32-encoded since our hotp() function expects that.
+    test_vectors = [(59, "94287082"),
+                    (1111111109, "07081804"),
+                    (1111111111, "14050471"),
+                    (1234567890, "89005924"),
+                    (2000000000, "69279037"),
+                    ]
+    
+    all_passed = True
+    for test_time, expected_code in test_vectors:
+        actual_code = totp(test_secret_base32,)
