@@ -103,11 +103,12 @@ def verify_totp(secret_base32: str, code_to_check: str, time_step: int = 30, dig
     current_time = int(time.time())
     for error_margin in range(-window, window + 1):
         time_to_check = current_time + (error_margin * time_step)
-        expected_code = totp(secret_base32, for_time=time_to_check, time_step=time_step, digits=digits)
+        expected_code = totp(secret_base32, for_time=time_to_check, 
+                             time_step=time_step, digits=digits)
         
         if hmac.compare_digest(expected_code, code_to_check):
             return True
-        return False
+    return False
     
 
 # Self-test against the OFFICIAL RFC 6238 test vectors.
@@ -149,3 +150,26 @@ def run_rfc6238_self_test():
             print("Some test vectors failed -- check the implementation.")
         print("=" * 60)
         return all_passed
+
+
+# Simulate setting up 2FA and logging in.
+def demo():
+    print("\nDEMO: Simulating 2FA setup and login\n")
+
+    secret = generate_secret()
+    print(f"1. Generated secret key (you'd scan this as a QR code): {secret}")
+
+    code = totp(secret)
+    print(f"2. Your current 6-digit authenticator code is: {code}")
+    print("   (this code will change every 30 seconds)")
+
+    is_valid = verify_totp(secret, code)
+    print(f"3. Verifying that code against the server logic... valid = {is_valid}")
+
+    is_valid_wrong = verify_totp(secret, "000000")
+    print(f"4. Verifying a made-up wrong code ('000000')... valid = {is_valid_wrong}")
+
+
+if __name__ == "__main__":
+    run_rfc6238_self_test()
+    demo()
